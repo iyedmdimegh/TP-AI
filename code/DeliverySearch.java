@@ -155,7 +155,7 @@ public class DeliverySearch extends GenericSearch {
             String bestResult = null;
             int bestStoreIndex = -1;
 
-            // Iterate over all stores to find the one with the lowest cost path to the customer
+            // Try every store to fnd cheepest ride for this customer.
             for (int storeIndex = 0; storeIndex < input.stores.size(); storeIndex++) {
                 State store = input.stores.get(storeIndex);
                 String result = agent.search(store, strategy);
@@ -191,13 +191,13 @@ public class DeliverySearch extends GenericSearch {
     }
 
     public static String GenGrid() {
-        // Updated to match new format: m;n;P;S;Stores;Customers;Tunnels
+        // Tiny helper that spits the m;n;P;S;Stores;Customers;Tunnels sample string.
         return "5;5;2;1;0,0;4,4,3,3;1,1,2,2";
     }
 
     private static ParsedInput parseInitialState(String initialState) {
         String[] sections = initialState.split(";");
-        // Expecting at least: m;n;P;S;Stores...
+        // Need at least m;n;P;S;Stores;... or out wit it
         if (sections.length < 5) {
             throw new IllegalArgumentException("Invalid initial state format. Expected m;n;P;S;Stores;Customers;Tunnels");
         }
@@ -207,12 +207,9 @@ public class DeliverySearch extends GenericSearch {
         int packageCount = Integer.parseInt(sections[2]);
         int storeCount = Integer.parseInt(sections[3]);
 
-        // --- NEW FORMAT MAPPING ---
-        // Section 4: Stores
-        // Section 5: Customers
-        // Section 6: Tunnels
+        // Format cheetsheet: idx4=stores, idx5=customers, idx6=tunnels.
 
-        // 1. Parse Stores (Index 4)
+        // 1) Pull stores out of slot 4.
         List<State> stores = new ArrayList<>();
         if (!sections[4].isEmpty()) {
             String[] storeTokens = sections[4].split(",");
@@ -221,7 +218,7 @@ public class DeliverySearch extends GenericSearch {
             }
         }
 
-        // Fallback if stores are empty but S > 0 (Robustness)
+        // if no s in input -< default vals
         if (stores.isEmpty()) {
             stores.add(new State(0, 0));
             if (storeCount > 1) {
@@ -232,7 +229,7 @@ public class DeliverySearch extends GenericSearch {
             }
         }
 
-        // 2. Parse Customers (Index 5)
+        // 2) Customers hang out in slot 5.
         List<State> customers = new ArrayList<>();
         if (sections.length > 5 && !sections[5].isEmpty()) {
             String[] coords = sections[5].split(",");
@@ -241,7 +238,7 @@ public class DeliverySearch extends GenericSearch {
             }
         }
 
-        // 3. Parse Tunnels (Index 6)
+        // 3) Any tunnels show up at slot 6, pair them both ways.
         Map<State, State> tunnels = new HashMap<>();
         if (sections.length > 6 && !sections[6].isEmpty()) {
             String[] tunnelTokens = sections[6].split(",");
