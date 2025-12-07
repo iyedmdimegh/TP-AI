@@ -33,6 +33,7 @@ public class DeliverySearch extends GenericSearch {
             return x == other.x && y == other.y;
         }
 
+
         @Override
         public int hashCode() {
             return Objects.hash(x, y);
@@ -43,6 +44,9 @@ public class DeliverySearch extends GenericSearch {
             return x + "," + y;
         }
     }
+
+
+
 
     private final int m;
     private final int n;
@@ -151,6 +155,7 @@ public class DeliverySearch extends GenericSearch {
             String bestResult = null;
             int bestStoreIndex = -1;
 
+            // Iterate over all stores to find the one with the lowest cost path to the customer
             for (int storeIndex = 0; storeIndex < input.stores.size(); storeIndex++) {
                 State store = input.stores.get(storeIndex);
                 String result = agent.search(store, strategy);
@@ -186,13 +191,15 @@ public class DeliverySearch extends GenericSearch {
     }
 
     public static String GenGrid() {
-        return "5;5;2;1;4,4,3,3;1,1,2,2";
+        // Updated to match new format: m;n;P;S;Stores;Customers;Tunnels
+        return "5;5;2;1;0,0;4,4,3,3;1,1,2,2";
     }
 
     private static ParsedInput parseInitialState(String initialState) {
         String[] sections = initialState.split(";");
+        // Expecting at least: m;n;P;S;Stores...
         if (sections.length < 5) {
-            throw new IllegalArgumentException("Invalid initial state format");
+            throw new IllegalArgumentException("Invalid initial state format. Expected m;n;P;S;Stores;Customers;Tunnels");
         }
 
         int m = Integer.parseInt(sections[0]);
@@ -200,33 +207,21 @@ public class DeliverySearch extends GenericSearch {
         int packageCount = Integer.parseInt(sections[2]);
         int storeCount = Integer.parseInt(sections[3]);
 
-        List<State> customers = new ArrayList<>();
-        if (!sections[4].isEmpty()) {
-            String[] coords = sections[4].split(",");
-            for (int i = 0; i + 1 < coords.length; i += 2) {
-                customers.add(new State(Integer.parseInt(coords[i]), Integer.parseInt(coords[i + 1])));
-            }
-        }
+        // --- NEW FORMAT MAPPING ---
+        // Section 4: Stores
+        // Section 5: Customers
+        // Section 6: Tunnels
 
-        Map<State, State> tunnels = new HashMap<>();
-        if (sections.length > 5 && !sections[5].isEmpty()) {
-            String[] tunnelTokens = sections[5].split(",");
-            for (int i = 0; i + 3 < tunnelTokens.length; i += 4) {
-                State entry = new State(Integer.parseInt(tunnelTokens[i]), Integer.parseInt(tunnelTokens[i + 1]));
-                State exit = new State(Integer.parseInt(tunnelTokens[i + 2]), Integer.parseInt(tunnelTokens[i + 3]));
-                tunnels.put(entry, exit);
-                tunnels.put(exit, entry);
-            }
-        }
-
+        // 1. Parse Stores (Index 4)
         List<State> stores = new ArrayList<>();
-        if (sections.length > 6 && !sections[6].isEmpty()) {
-            String[] storeTokens = sections[6].split(",");
+        if (!sections[4].isEmpty()) {
+            String[] storeTokens = sections[4].split(",");
             for (int i = 0; i + 1 < storeTokens.length; i += 2) {
                 stores.add(new State(Integer.parseInt(storeTokens[i]), Integer.parseInt(storeTokens[i + 1])));
             }
         }
 
+        // Fallback if stores are empty but S > 0 (Robustness)
         if (stores.isEmpty()) {
             stores.add(new State(0, 0));
             if (storeCount > 1) {
@@ -234,6 +229,27 @@ public class DeliverySearch extends GenericSearch {
             }
             if (storeCount > 2) {
                 stores.add(new State(0, Math.max(0, n - 1)));
+            }
+        }
+
+        // 2. Parse Customers (Index 5)
+        List<State> customers = new ArrayList<>();
+        if (sections.length > 5 && !sections[5].isEmpty()) {
+            String[] coords = sections[5].split(",");
+            for (int i = 0; i + 1 < coords.length; i += 2) {
+                customers.add(new State(Integer.parseInt(coords[i]), Integer.parseInt(coords[i + 1])));
+            }
+        }
+
+        // 3. Parse Tunnels (Index 6)
+        Map<State, State> tunnels = new HashMap<>();
+        if (sections.length > 6 && !sections[6].isEmpty()) {
+            String[] tunnelTokens = sections[6].split(",");
+            for (int i = 0; i + 3 < tunnelTokens.length; i += 4) {
+                State entry = new State(Integer.parseInt(tunnelTokens[i]), Integer.parseInt(tunnelTokens[i + 1]));
+                State exit = new State(Integer.parseInt(tunnelTokens[i + 2]), Integer.parseInt(tunnelTokens[i + 3]));
+                tunnels.put(entry, exit);
+                tunnels.put(exit, entry);
             }
         }
 
