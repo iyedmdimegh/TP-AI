@@ -150,7 +150,8 @@ public class MultiScenarioVisualTest extends JPanel {
             }
         }
 
-        g2.setStroke(new BasicStroke(2, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 10.0f, new float[] { 6.0f }, 0.0f));
+        g2.setStroke(
+                new BasicStroke(2, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 10.0f, new float[] { 6.0f }, 0.0f));
         g2.setColor(new Color(100, 50, 150));
         Set<String> drawn = new HashSet<>();
         for (Map.Entry<Point, Point> e : tunnels.entrySet()) {
@@ -180,7 +181,8 @@ public class MultiScenarioVisualTest extends JPanel {
                 Point cur = path.get(i), nxt = path.get(i + 1);
                 Point px1 = toPixel(cur.x, cur.y), px2 = toPixel(nxt.x, nxt.y);
                 if (Math.abs(cur.x - nxt.x) + Math.abs(cur.y - nxt.y) > 1) {
-                    g2.setStroke(new BasicStroke(3, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND, 0, new float[] { 7 }, 0));
+                    g2.setStroke(
+                            new BasicStroke(3, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND, 0, new float[] { 7 }, 0));
                     g2.drawLine(px1.x, px1.y, px2.x, px2.y);
                     g2.setStroke(new BasicStroke(4));
                 } else {
@@ -357,22 +359,22 @@ public class MultiScenarioVisualTest extends JPanel {
             for (int y = 0; y < 5; y++) {
                 if (x + 1 < 7) {
                     int cost = 1;
-                    
+
                     // Make horizontal travel VERY expensive from x=1 to x=5 at y=2
                     if (y == 2 && x >= 1 && x < 5) {
                         cost = 200;
                     }
-                    
+
                     // Block some roads to create obstacles
                     if ((x == 3 && y == 0) || (x == 5 && y == 4)) {
                         cost = 0; // Blocked roads
                     }
-                    
+
                     // Expensive detour areas
                     if (y == 1 && x >= 3 && x < 5) {
                         cost = 50;
                     }
-                    
+
                     // Extremely expensive road from (0,4) to (1,4)
                     if (x == 0 && y == 4) {
                         cost = 2000;
@@ -386,24 +388,24 @@ public class MultiScenarioVisualTest extends JPanel {
                     if (x == 2 && y == 3) {
                         cost = 2000;
                     }
-                    
+
                     traffic.append(x).append(",").append(y).append(",")
                             .append(x + 1).append(",").append(y).append(",")
                             .append(cost).append(";");
                 }
                 if (y + 1 < 5) {
                     int cost = 1;
-                    
+
                     // Block some vertical roads
                     if ((x == 3 && y == 2) || (x == 1 && y == 0)) {
                         cost = 0; // Blocked vertical roads
                     }
-                    
+
                     // Expensive vertical sections
                     if (x == 5 && y == 1) {
                         cost = 40;
                     }
-                    
+
                     traffic.append(x).append(",").append(y).append(",")
                             .append(x).append(",").append(y + 1).append(",")
                             .append(cost).append(";");
